@@ -24,7 +24,7 @@ void handleReady(const Rest::Request&, Http::ResponseWriter response) {
 class BankerService {
 public:
     BankerService(Address addr)
-        : httpEndpoint(std::make_shared<Http::Endpoint>(addr))
+      : httpEndpoint(std::make_shared<Http::Endpoint>(addr))
         , desc("Banking API", "0.1")
     { }
 
@@ -42,7 +42,7 @@ public:
         Rest::Swagger swagger(desc);
         swagger
             .uiPath("/doc")
-            .uiDirectory("/home/octal/code/web/swagger-ui-2.1.4/dist")
+            .uiDirectory("/home/mxx/workspace/swagger-ui/dist")
             .apiPath("/banker-api.json")
             .serializer(&Rest::Serializer::rapidJson)
             .install(router);

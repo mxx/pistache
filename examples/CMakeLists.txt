@@ -1,10 +1,10 @@
 function(pistache_example example_name)
     set(EXAMPLE_EXECUTABLE run_${example_name})
     set(EXAMPLE_SOURCE ${example_name}.cc)
-
+    set (CMAKE_CXX_STANDARD 11)
     add_executable(${EXAMPLE_EXECUTABLE} ${EXAMPLE_SOURCE})
-    target_link_libraries(${EXAMPLE_EXECUTABLE} pistache)
-endfunction()
+    target_link_libraries(${EXAMPLE_EXECUTABLE} pistache pthread)
+  endfunction()
 
 pistache_example(http_server)
 pistache_example(http_client)
