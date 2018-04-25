@@ -25,18 +25,18 @@
 #include <pistache/transport.h>
 
 namespace Pistache {
-namespace Http {
+  namespace Http {
 
-namespace details {
+  namespace details {
     struct prototype_tag { };
 
     template<typename P>
     struct IsHttpPrototype {
         template<typename U> static auto test(U *) -> decltype(typename U::tag());
-        template<typename U> static auto test(...) -> std::false_type;
+      template<typename U> static auto test(...) -> std::false_type;
 
         static constexpr bool value =
-            std::is_same<decltype(test<P>(nullptr)), prototype_tag>::value;
+          std::is_same<decltype(test<P>(nullptr)), prototype_tag>::value;
     };
 };
 
@@ -53,7 +53,7 @@ namespace Private {
     class BodyStep;
 }
 
-template< class CharT, class Traits>
+ template< class CharT, class Traits>
 std::basic_ostream<CharT, Traits>& crlf(std::basic_ostream<CharT, Traits>& os) {
     static constexpr char CRLF[] = {0xD, 0xA};
     os.write(CRLF, 2);
@@ -423,7 +423,7 @@ public:
     // C++11: std::weak_ptr move constructor is C++14 only so the default
     // version of move constructor / assignement operator does not work and we
     // have to define it ourself
-    ResponseWriter(ResponseWriter&& other)
+ ResponseWriter(ResponseWriter&& other)
         : Response(std::move(other))
         , peer_(other.peer_)
         , buf_(std::move(other.buf_))
@@ -579,10 +579,10 @@ namespace Private {
             : message(request)
         { }
 
-        virtual State apply(StreamCursor& cursor) = 0;
-
+      virtual State apply(StreamCursor& cursor) = 0;
+      
         void raise(const char* msg, Code code = Code::Bad_Request);
-
+      
         Message *message;
     };
 
@@ -605,7 +605,7 @@ namespace Private {
     struct HeadersStep : public Step {
         HeadersStep(Message* request)
             : Step(request)
-        { }
+      { }
 
         State apply(StreamCursor& cursor);
     };
@@ -644,7 +644,8 @@ namespace Private {
 
         State parseContentLength(StreamCursor& cursor, const std::shared_ptr<Header::ContentLength>& cl);
         State parseTransferEncoding(StreamCursor& cursor, const std::shared_ptr<Header::TransferEncoding>& te);
-
+        State parseMultipartContent(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct);
+        
         Chunk chunk;
         size_t bytesRead;
     };
@@ -670,7 +671,8 @@ namespace Private {
 
         State parse();
 
-        ArrayStreamBuf<Const::MaxBuffer> buffer;
+        //ArrayStreamBuf<Const::MaxBuffer> buffer;
+        DynamicStreamBuf buffer;
         StreamCursor cursor;
 
     protected:
@@ -740,17 +742,17 @@ namespace Private {
 
 class Handler : public Tcp::Handler {
 public:
-    void onInput(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer);
-
-    void onConnection(const std::shared_ptr<Tcp::Peer>& peer);
-    void onDisconnection(const std::shared_ptr<Tcp::Peer>& peer);
-
-    virtual void onRequest(const Request& request, ResponseWriter response) = 0;
-
-    virtual void onTimeout(const Request& request, ResponseWriter response);
+   void onInput(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer);
+   void onFeeding(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer);
+   void onConnection(const std::shared_ptr<Tcp::Peer>& peer);
+   void onDisconnection(const std::shared_ptr<Tcp::Peer>& peer);
+    
+   virtual void onRequest(const Request& request, ResponseWriter response) = 0;
+   virtual void onTimeout(const Request& request, ResponseWriter response);
 
 private:
-    Private::Parser<Http::Request>& getParser(const std::shared_ptr<Tcp::Peer>& peer) const;
+   Private::Parser<Http::Request>& getParser(const std::shared_ptr<Tcp::Peer>& peer) const;
+   void onInputData(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer,bool bFeed);
 };
 
 template<typename H, typename... Args>

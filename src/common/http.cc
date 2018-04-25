@@ -26,10 +26,10 @@ using namespace std;
 namespace Pistache {
 namespace Http {
 
-template<typename H, typename Stream, typename... Args>
-typename std::enable_if<Header::IsHeader<H>::value, Stream&>::type
+  template<typename H, typename Stream, typename... Args>
+  typename std::enable_if<Header::IsHeader<H>::value, Stream&>::type
 writeHeader(Stream& stream, Args&& ...args) {
-    H header(std::forward<Args>(args)...);
+  H header(std::forward<Args>(args)...);
 
     stream << H::Name << ": ";
     header.write(stream);
@@ -40,7 +40,7 @@ writeHeader(Stream& stream, Args&& ...args) {
 }
 
 namespace {
-    bool writeStatusLine(Version version, Code code, DynamicStreamBuf& buf) {
+  bool writeStatusLine(Version version, Code code, DynamicStreamBuf& buf) {
         #define OUT(...) \
             do { \
                 __VA_ARGS__; \
@@ -54,7 +54,7 @@ namespace {
         OUT(os << ' ');
         OUT(os << code);
         OUT(os << crlf);
-
+        
         return true;
 
         #undef OUT
@@ -325,10 +325,12 @@ namespace Private {
     BodyStep::apply(StreamCursor& cursor) {
         auto cl = message->headers_.tryGet<Header::ContentLength>();
         auto te = message->headers_.tryGet<Header::TransferEncoding>();
+        auto ct = message->headers_.tryGet<Header::ContentType>();
 
         if (cl && te)
             raise("Got mutually exclusive ContentLength and TransferEncoding header");
 
+        
         if (cl)
             return parseContentLength(cursor, cl);
 
@@ -344,7 +346,7 @@ namespace Private {
         auto contentLength = cl->value();
 
         auto readBody = [&](size_t size) {
-            StreamCursor::Token token(cursor);
+          StreamCursor::Token token(cursor);
             const size_t available = cursor.remaining();
 
             // We have an incomplete body, read what we can
@@ -373,7 +375,7 @@ namespace Private {
             message->body_.reserve(contentLength);
             if (!readBody(contentLength)) return State::Again;
         }
-
+        
         bytesRead = 0;
         return State::Done;
     }
@@ -434,7 +436,7 @@ namespace Private {
             } catch (const std::exception& e) {
                 raise(e.what());
             }
-
+            
             return State::Done;
         }
         else {
@@ -442,6 +444,54 @@ namespace Private {
         }
         return State::Done;
     }
+
+  State
+  BodyStep::parseMultipartContent(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct) {
+    auto contentType = ct->mime();
+    if (typeid(contentType) == typeid(MIME(Multipart, FormData))) {
+      // This is the beginning of the multipart body
+
+      // std::vector<StreamCursor&> mulipartFileDataCursors;
+      // cursors.push_back(&cursor);
+#define STR(str)                                \
+      str, sizeof(str) - 1
+
+      skip_whitespaces(cursor);
+      if (!match_until(';', cursor) && !match_string(STR("boundary"), cursor) && !match_until('=', cursor)) {
+        raise("Multipart Form data boundary not defined", Code::Bad_Request);
+        return State::Done;
+      }
+
+      //auto token = matchValue(cursor);
+      // Boundary value
+      //auto value = token.text();
+
+      while (!match_until('-', cursor)) {
+        //message->body_.append()
+          // FormData();
+          // FormField({})
+
+          ssize_t fileBufferSize;
+
+        try {
+          auto* tmpFd = tmpfile();
+          do {
+            //cursor.advance(available);
+            //auto part = chunkData.rawText();
+            //std::fwrite(part, sizeof(char), available, tmpFd);
+          } while (0);
+            } catch (const std::exception& e) {
+          raise(e.what());
+        }
+      };
+    }
+    else {
+      raise("Content-Type in request body should be multipart form data", Code::Bad_Request);
+    }
+
+    return State::Done;
+  }
+  
 
     State
     ParserBase::parse() {
@@ -460,7 +510,7 @@ namespace Private {
 
     bool
     ParserBase::feed(const char* data, size_t len) {
-        return buffer.feed(data, len);
+      return buffer.feed(data, len);
     }
 
     void
@@ -548,9 +598,9 @@ Request::cookies() const {
 }
 
 #ifdef LIBSTDCPP_SMARTPTR_LOCK_FIXME
-std::shared_ptr<Tcp::Peer>
+  std::shared_ptr<Tcp::Peer>
 Request::peer() const {
-    auto p = peer_.lock();
+  auto p = peer_.lock();
 
     if (!p) throw std::runtime_error("Failed to retrieve peer: Broken pipe");
 
@@ -594,7 +644,7 @@ ResponseStream::ResponseStream(
 
 void
 ResponseStream::flush() {
-    timeout_.disarm();
+  timeout_.disarm();
     auto buf = buf_.buffer();
 
     auto fd = peer()->fd();
@@ -642,9 +692,8 @@ ResponseWriter::putOnWire(const char* data, size_t len)
         OUT(writeHeader<Header::ContentLength>(os, len));
 
         OUT(os << crlf);
-
         if (len > 0) {
-            OUT(os.write(data, len));
+          OUT(os.write(data, len));
         }
 
         auto buffer = buf_.buffer();
@@ -730,14 +779,25 @@ serveFile(ResponseWriter& response, const char* fileName, const Mime::MediaType&
 }
 
 void
-Handler::onInput(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer) {
+Handler::onInput(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer){
+  onInputData(buffer,len,peer,false);
+}
+  
+void
+Handler::onFeeding(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer){
+  onInputData(buffer,len,peer,true);
+}
+  
+void
+Handler::onInputData(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer, bool bFeedOnly){
     auto& parser = getParser(peer);
     try {
         if (!parser.feed(buffer, len)) {
             parser.reset();
             throw HttpError(Code::Request_Entity_Too_Large, "Request exceeded maximum buffer size");
         }
-
+        if (bFeedOnly)
+          return;
         auto state = parser.parse();
         if (state == Private::State::Done) {
             ResponseWriter response(transport(), parser.request, this);
@@ -765,7 +825,7 @@ Handler::onInput(const char* buffer, size_t len, const std::shared_ptr<Tcp::Peer
 
 void
 Handler::onConnection(const std::shared_ptr<Tcp::Peer>& peer) {
-    peer->putData(ParserData, std::make_shared<Private::Parser<Http::Request>>());
+  peer->putData(ParserData, std::make_shared<Private::Parser<Http::Request>>());
 }
 
 void
@@ -789,7 +849,7 @@ Timeout::onTimeout(uint64_t numWakeup) {
 
 Private::Parser<Http::Request>&
 Handler::getParser(const std::shared_ptr<Tcp::Peer>& peer) const {
-    return *peer->getData<Private::Parser<Http::Request>>(ParserData);
+  return *peer->getData<Private::Parser<Http::Request>>(ParserData);
 }
 
 

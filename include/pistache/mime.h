@@ -38,6 +38,7 @@ namespace Mime {
     \
     SUB_TYPE(Json          , "json")                  \
     SUB_TYPE(FormUrlEncoded, "x-www-form-urlencoded") \
+    SUB_TYPE(FormData      , "form-data")             \
     \
     SUB_TYPE(Png, "png") \
     SUB_TYPE(Gif, "gif") \

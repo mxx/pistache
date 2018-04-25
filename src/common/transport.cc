@@ -26,7 +26,7 @@ Transport::Transport(const std::shared_ptr<Tcp::Handler>& handler) {
 
 void
 Transport::init(const std::shared_ptr<Tcp::Handler>& handler) {
-    handler_ = handler;
+  handler_ = handler;
     handler_->associateTransport(this);
 }
 
@@ -132,7 +132,7 @@ Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
         if (bytes == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if (totalBytes > 0) {
-                    handler_->onInput(buffer, totalBytes, peer);
+                  handler_->onInput(buffer, totalBytes, peer);
                 }
             } else {
                 if (errno == ECONNRESET) {
@@ -152,8 +152,9 @@ Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
         else {
             totalBytes += bytes;
             if (totalBytes >= Const::MaxBuffer) {
-                std::cerr << "Too long packet" << std::endl;
-                break;
+              //std::cerr << "Too long packet" << std::endl;
+              handler_->onFeeding(buffer,Const::MaxBuffer,peer);
+              totalBytes = 0;
             }
         }
     }

@@ -19,7 +19,7 @@
 #define SAFE_HEADER_CAST
 
 namespace Pistache {
-namespace Http {
+  namespace Http {
 namespace Header {
 
 #ifdef SAFE_HEADER_CAST
@@ -31,7 +31,7 @@ static constexpr uint64_t prime = 1099511628211ULL;
 
 constexpr uint64_t hash_one(char c, const char* remain, unsigned long long value)
 {
-    return c == 0 ? value : hash_one(remain[0], remain + 1, (value ^ c) * prime);
+  return c == 0 ? value : hash_one(remain[0], remain + 1, (value ^ c) * prime);
 }
 
 constexpr uint64_t hash(const char* str)
@@ -53,7 +53,7 @@ constexpr uint64_t hash(const char* str)
         static constexpr const char *Name = header_name; \
         const char *name() const { return Name; }
 #endif
-
+ 
 // 3.5 Content Codings
 // 3.6 Transfer Codings
 enum class Encoding {
@@ -63,7 +63,17 @@ enum class Encoding {
     Identity,
     Chunked,
     Unknown
-};
+      };
+
+enum class ContentTransferEncodingValue {
+   _7Bit,
+   Quote_Printable,
+   Base64,
+   _8Bit,
+   Binary,
+   X_Token,
+   Unknown
+ };
 
 const char* encodingString(Encoding encoding);
 
@@ -274,6 +284,26 @@ public:
     { }
 };
 
+class ContentTransferEncoding: public Header {
+public:
+   NAME("Content-Transfer-Encoding")
+
+   ContentTransferEncoding()
+     : value_(ContentTransferEncodingValue::_7Bit)
+   { }
+
+  explicit ContentTransferEncoding(ContentTransferEncodingValue encoding)
+     : value_(encoding)
+   { }
+
+   void parseRaw(const char* str, size_t len);
+   void write(std::ostream& os) const;
+
+   ContentTransferEncodingValue value() const { return value_; };
+ private:
+   ContentTransferEncodingValue  value_;
+};
+ 
 class ContentLength : public Header {
 public:
     NAME("Content-Length");

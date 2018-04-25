@@ -65,7 +65,7 @@ DynamicStreamBuf::reserve(size_t size)
 {
     if (size > maxSize_) size = maxSize_;
     const size_t oldSize = data_.size();
-    data_.resize(size);
+    data_.reserve(size);
     this->setp(&data_[0] + oldSize, &data_[0] + size);
 }
 

@@ -16,7 +16,7 @@ namespace Pistache {
 namespace Tcp {
 
 class Peer;
-class Transport;
+ class Transport;
 
 enum class Options : uint64_t {
     None                 = 0,
@@ -25,7 +25,7 @@ enum class Options : uint64_t {
     FastOpen             = Linger << 1,
     QuickAck             = FastOpen << 1,
     ReuseAddr            = QuickAck << 1,
-    ReverseLookup        = ReuseAddr << 1,
+      ReverseLookup        = ReuseAddr << 1,
     InstallSignalHandler = ReverseLookup << 1
 };
 
@@ -39,7 +39,7 @@ public:
     ~Handler();
 
     virtual void onInput(const char *buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer) = 0;
-
+    virtual void onFeeding(const char *buffer, size_t len, const std::shared_ptr<Tcp::Peer>& peer) = 0;
     virtual void onConnection(const std::shared_ptr<Tcp::Peer>& peer);
     virtual void onDisconnection(const std::shared_ptr<Tcp::Peer>& peer);
 

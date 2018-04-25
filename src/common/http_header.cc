@@ -428,6 +428,33 @@ AccessControlAllowOrigin::write(std::ostream& os) const {
   os << uri_;
 }
 
+
+void
+ContentTransferEncoding::parseRaw(const char* str, size_t len) {
+  
+  if (!strncmp(str, STR("base64"))) {
+    // 
+  }
+  else if (!strncmp(str, STR("QUOTED-PRINTABLE"))) {
+    //
+  }
+  else if (!strncmp(str, STR("7BIT"))) {
+    // 
+  }
+  else if (!strncmp(str, STR("8BIT"))) {
+    // 
+  }
+  else if (!strncmp(str, STR("BINARY"))) {
+    // 
+  }
+  else {
+    // 
+  }
+}
+  void
+  ContentTransferEncoding::write(std::ostream& os) const {
+  }
+  
 void
 EncodingHeader::parseRaw(const char* str, size_t len) {
     // TODO: case-insensitive
@@ -494,6 +521,19 @@ ContentType::write(std::ostream& os) const {
     os << mime_.toString();
 }
 
+/*
+  MultipartContentType::parseRaw(const char* str, size_t len)
+  {
+    auto mime = mime_.parseRaw(str, len);
+
+    std::string str(str);
+    auto boundary = std::find(std::begin(str), std::end(str), "boundary=");
+
+    if (boundary != std::end(str)) {
+      boundary = str.substr(boundary)
+        }
+  }
+*/  
 } // namespace Header
 } // namespace Http
 } // namespace Pistache
