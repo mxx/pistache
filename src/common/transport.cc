@@ -16,11 +16,11 @@
 
 namespace Pistache {
 
-using namespace Polling;
+  using namespace Polling;
 
 namespace Tcp {
 
-Transport::Transport(const std::shared_ptr<Tcp::Handler>& handler) {
+  Transport::Transport(const std::shared_ptr<Tcp::Handler>& handler) {
     init(handler);
 }
 
@@ -55,7 +55,7 @@ Transport::handleNewPeer(const std::shared_ptr<Tcp::Peer>& peer) {
         handlePeer(peer);
     }
 }
-
+  
 void
 Transport::onReady(const Aio::FdSet& fds) {
     for (const auto& entry: fds) {
@@ -119,8 +119,7 @@ Transport::disarmTimer(Fd fd) {
 void
 Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
     char buffer[Const::MaxBuffer];
-    memset(buffer, 0, sizeof buffer);
-
+    
     ssize_t totalBytes = 0;
     int fd = peer->fd();
 
@@ -139,7 +138,7 @@ Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
                     handlePeerDisconnection(peer);
                 }
                 else {
-                    throw std::runtime_error(strerror(errno));
+                  throw std::runtime_error(strerror(errno));
                 }
             }
             break;
@@ -153,7 +152,8 @@ Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
             totalBytes += bytes;
             if (totalBytes >= Const::MaxBuffer) {
               //std::cerr << "Too long packet" << std::endl;
-              handler_->onFeeding(buffer,Const::MaxBuffer,peer);
+              //handler_->onFeeding(buffer,Const::MaxBuffer,peer);
+              handler_->onInput(buffer,Const::MaxBuffer,peer);
               totalBytes = 0;
             }
         }

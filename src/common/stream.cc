@@ -38,7 +38,7 @@ FileBuffer::init(const char* fileName)
     struct stat sb;
     int res = ::fstat(fd, &sb);
     if (res == -1) {
-        throw std::runtime_error("Could not get file stats");
+      throw std::runtime_error("Could not get file stats");
     }
 
     fd_ = fd;

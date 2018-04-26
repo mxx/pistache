@@ -267,7 +267,7 @@ namespace Private {
 
     State
     HeadersStep::apply(StreamCursor& cursor) {
-        StreamCursor::Revert revert(cursor);
+      StreamCursor::Revert revert(cursor);
 
         while (!cursor.eol()) {
             StreamCursor::Revert headerRevert(cursor);
@@ -308,13 +308,16 @@ namespace Private {
                 std::string value(cursor.offset(start), cursor.diff(start));
                 message->headers_.addRaw(Header::Raw(std::move(name), std::move(value)));
             }
-
+            
             // CRLF
             if (!cursor.advance(2)) return State::Again;
 
             headerRevert.ignore();
         }
 
+        auto cl = message->headers_.tryGet<Header::ContentLength>();
+        //if (cl) cursor.buf->pre_alloc(cl->value());
+        
         if (!cursor.advance(2)) return State::Again;
 
         revert.ignore();
@@ -360,7 +363,7 @@ namespace Private {
             }
 
             cursor.advance(size);
-            message->body_.append(token.rawText(), token.size());
+          message->body_.append(token.rawText(), token.size());
             return true;
         };
 

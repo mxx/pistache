@@ -97,7 +97,16 @@ namespace Pistache {
   }
 
   bool feed(const char* data, size_t len) {
-    if (size + len >= N) {
+    if (this->gptr() && this->gptr()!=bytes) {
+      size -= this->gptr() - bytes ;
+      if (size) {
+        memmove(bytes,this->gptr(),size);
+        Base::setg(bytes,bytes,bytes+size);
+        
+      }
+    }
+    
+    if (size + len > N) {
       return false;
     }
 
@@ -235,6 +244,11 @@ namespace Pistache {
       auto pit = data_.insert(it + data_.size(),data,data+len);
       Base::setg(data_.data(), data_.data()+pos, data_.data() + data_.size());
       return true;      
+    }
+
+    void pre_alloc(size_t len)
+    {
+      reserve(data_.size() + len);
     }
 
   protected:
