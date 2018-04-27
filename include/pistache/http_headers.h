@@ -21,14 +21,14 @@ namespace Header {
 std::string
 toLowercase(std::string str);
 
-struct LowercaseHash {
+ struct LowercaseHash {
     size_t operator()(const std::string& key) const {
         return std::hash<std::string>{}(toLowercase(key));
     }
 };
 
 struct LowercaseEqual {
-    bool operator()(const std::string& left, const std::string& right) const {
+  bool operator()(const std::string& left, const std::string& right) const {
         return toLowercase(left) == toLowercase(right);
     }
 };
@@ -53,7 +53,7 @@ public:
 
     template<typename H>
     typename std::enable_if<
-                 IsHeader<H>::value, std::shared_ptr<const H>
+      IsHeader<H>::value, std::shared_ptr<const H>
              >::type
     tryGet() const {
         return std::static_pointer_cast<const H>(tryGet(H::Name));
@@ -145,7 +145,7 @@ struct Registry {
 };
 
 template<typename H>
-struct Registrar {
+  struct Registrar {
     static_assert(IsHeader<H>::value, "Registrar only works with header types");
 
     Registrar() {
@@ -160,7 +160,7 @@ struct Registrar {
 #define CAT_I(a, b) a ## b
 
 #define UNIQUE_NAME(base) CAT(base, __LINE__)
-
+ 
 #define RegisterHeader(Header) \
     Registrar<Header> UNIQUE_NAME(CAT(CAT_I(__, Header), __))
 

@@ -27,7 +27,7 @@ namespace Tcp {
 void
 Transport::init(const std::shared_ptr<Tcp::Handler>& handler) {
   handler_ = handler;
-    handler_->associateTransport(this);
+  handler_->associateTransport(this);
 }
 
 std::shared_ptr<Aio::Handler>
@@ -152,8 +152,8 @@ Transport::handleIncoming(const std::shared_ptr<Peer>& peer) {
             totalBytes += bytes;
             if (totalBytes >= Const::MaxBuffer) {
               //std::cerr << "Too long packet" << std::endl;
-              //handler_->onFeeding(buffer,Const::MaxBuffer,peer);
-              handler_->onInput(buffer,Const::MaxBuffer,peer);
+              handler_->onFeeding(buffer,Const::MaxBuffer,peer);
+              //handler_->onInput(buffer,Const::MaxBuffer,peer);
               totalBytes = 0;
             }
         }
@@ -372,7 +372,7 @@ bool
 Transport::isPeerFd(Fd fd) const {
     return peers.find(fd) != std::end(peers);
 }
-
+  
 bool
 Transport::isTimerFd(Fd fd) const {
     return timers.find(fd) != std::end(timers);

@@ -75,7 +75,7 @@ StreamCursor::advance(size_t count) {
         return false;
 
     for (size_t i = 0; i < count; ++i) {
-        buf->sbumpc();
+      buf->sbumpc();
     }
 
     return true;

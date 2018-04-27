@@ -644,7 +644,7 @@ namespace Private {
 
         State parseContentLength(StreamCursor& cursor, const std::shared_ptr<Header::ContentLength>& cl);
         State parseTransferEncoding(StreamCursor& cursor, const std::shared_ptr<Header::TransferEncoding>& te);
-        State parseMultipartContent(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct);
+        State parseMultipartForm(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct);
         
         Chunk chunk;
         size_t bytesRead;

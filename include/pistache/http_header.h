@@ -27,7 +27,7 @@ namespace detail {
 
 // compile-time FNV-1a hashing algorithm
 static constexpr uint64_t basis = 14695981039346656037ULL;
-static constexpr uint64_t prime = 1099511628211ULL;
+ static constexpr uint64_t prime = 1099511628211ULL;
 
 constexpr uint64_t hash_one(char c, const char* remain, unsigned long long value)
 {
@@ -345,6 +345,27 @@ private:
     Mime::MediaType mime_;
 
 };
+
+class ContentDisposition : public Header {
+ public:
+  NAME("Content-Disposition")
+
+    ContentDisposition() { }
+
+  explicit ContentDisposition(const Mime::MediaType& mime) :
+   mime_(mime)
+   { }
+
+   void parseRaw(const char* str, size_t len);
+   void write(std::ostream& os) const;
+
+   Mime::MediaType mime() const { return mime_; }
+   void setMime(const Mime::MediaType& mime) { mime_ = mime; }
+
+ private:
+   Mime::MediaType mime_;
+
+ };
 
 class Date : public Header {
 public:

@@ -13,7 +13,7 @@
 
 namespace Pistache {
 namespace Http {
-namespace Header {
+  namespace Header {
 
 namespace {
     std::unordered_map<
@@ -30,7 +30,7 @@ RegisterHeader(Allow);
 RegisterHeader(CacheControl);
 RegisterHeader(Connection);
 RegisterHeader(ContentEncoding);
-//RegisterHeader(ContentDisposition); 
+RegisterHeader(ContentDisposition); //not part of HTTP,rfc6266
 RegisterHeader(TransferEncoding);
 RegisterHeader(ContentLength);
 RegisterHeader(ContentType);
@@ -43,7 +43,7 @@ RegisterHeader(UserAgent);
 
 std::string
 toLowercase(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
@@ -160,7 +160,7 @@ Collection::has(const std::string& name) const {
     return getImpl(name).first;
 }
 
-std::vector<std::shared_ptr<Header>>
+    std::vector<std::shared_ptr<Header>>
 Collection::list() const {
     std::vector<std::shared_ptr<Header>> ret;
     ret.reserve(headers.size());

@@ -135,70 +135,12 @@ namespace Pistache {
   size_t size;
   };
 
-<<<<<<< HEAD
   struct Buffer {
-  Buffer()
-  : data(nullptr)
-  , len(0)
-      , isOwned(false)
-=======
-template<size_t N, typename CharT = char>
-class ArrayStreamBuf : public StreamBuf<CharT> {
-public:
-    typedef StreamBuf<CharT> Base;
-
-    ArrayStreamBuf()
-      : size(0)
-    {
-        memset(bytes, 0, N);
-        Base::setg(bytes, bytes, bytes + N);
-    }
-
-    template<size_t M>
-    ArrayStreamBuf(char (&arr)[M]) {
-        static_assert(M <= N, "Source array exceeds maximum capacity");
-        memcpy(bytes, arr, M);
-        size = M;
-        Base::setg(bytes, bytes, bytes + M);
-    }
-
-    bool feed(const char* data, size_t len) {
-        if (size + len > N) {
-            return false;
-        }
-
-        memcpy(bytes + size, data, len);
-        CharT *cur = nullptr;
-        if (this->gptr()) {
-            cur = this->gptr();
-        } else {
-            cur = bytes + size;
-        }
-
-        Base::setg(bytes, cur, bytes + size + len);
-
-        size += len;
-        return true;
-    }
-
-    void reset() {
-        memset(bytes, 0, N);
-        size = 0;
-        Base::setg(bytes, bytes, bytes);
-    }
-
-private:
-    char bytes[N];
-    size_t size;
-};
-
-struct Buffer {
     Buffer()
         : data(nullptr)
         , len(0)
         , isOwned(false)
->>>>>>> 90e40f2cc9f00bc40a3310efc345e61a24e2fae0
-    { }
+  { }
 
   Buffer(const char * const data, size_t len, bool own = false)
   : data(data)
@@ -297,6 +239,12 @@ struct Buffer {
         return 0;
     }
     bool feed(const char* data, size_t len) {
+      //if buffer empty, direct copy
+      /* if (this->gptr() && (this->gptr() == this->egptr())) { */
+      /*   memcpy(data_.data(),data,len); */
+      /*   Base::setg(data_.data(), data_.data(), data_.data() + len); */
+      /*   return true; */
+      /* } */
       auto it = data_.begin();
       auto pos = this->position();
       auto pit = data_.insert(it + data_.size(),data,data+len);

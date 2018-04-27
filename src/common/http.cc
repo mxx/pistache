@@ -31,7 +31,7 @@ namespace Http {
 writeHeader(Stream& stream, Args&& ...args) {
   H header(std::forward<Args>(args)...);
 
-    stream << H::Name << ": ";
+  stream << H::Name << ": ";
     header.write(stream);
 
     stream << crlf;
@@ -58,7 +58,7 @@ namespace {
         return true;
 
         #undef OUT
-    }
+  }
 
     bool writeHeaders(const Header::Collection& headers, DynamicStreamBuf& buf) {
         #define OUT(...) \
@@ -156,7 +156,7 @@ namespace Private {
         StreamCursor::Token resToken(cursor);
         while ((n = cursor.current()) != '?' && n != ' ')
             if (!cursor.advance(1)) return State::Again;
-
+        
         request->resource_ = resToken.text();
 
         // Query parameters of the Uri
@@ -315,7 +315,7 @@ namespace Private {
             headerRevert.ignore();
         }
 
-        auto cl = message->headers_.tryGet<Header::ContentLength>();
+        //auto cl = message->headers_.tryGet<Header::ContentLength>();
         //if (cl) cursor.buf->pre_alloc(cl->value());
         
         if (!cursor.advance(2)) return State::Again;
@@ -333,6 +333,8 @@ namespace Private {
         if (cl && te)
             raise("Got mutually exclusive ContentLength and TransferEncoding header");
 
+        if (ct && (typeid(ct->mime())==typeid(MIME(Multipart, FormData))))
+            return parseMultipartForm(cursor,ct);
         
         if (cl)
             return parseContentLength(cursor, cl);
@@ -362,7 +364,7 @@ namespace Private {
                 return false;
             }
 
-            cursor.advance(size);
+          cursor.advance(size);
           message->body_.append(token.rawText(), token.size());
             return true;
         };
@@ -449,27 +451,38 @@ namespace Private {
     }
 
   State
-  BodyStep::parseMultipartContent(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct) {
-    auto contentType = ct->mime();
-    if (typeid(contentType) == typeid(MIME(Multipart, FormData))) {
-      // This is the beginning of the multipart body
-
-      // std::vector<StreamCursor&> mulipartFileDataCursors;
-      // cursors.push_back(&cursor);
-#define STR(str)                                \
-      str, sizeof(str) - 1
-
-      skip_whitespaces(cursor);
-      if (!match_until(';', cursor) && !match_string(STR("boundary"), cursor) && !match_until('=', cursor)) {
+  BodyStep::parseMultipartForm(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct) {
+    auto request = static_cast<Request *>(message);    
+     // This is the beginning of the multipart body
+    auto mime = ct->mime();
+    auto boundary = mime.getParam("boundary");
+    string b=boundary.get();
+      if (boundary.isEmpty()) {
         raise("Multipart Form data boundary not defined", Code::Bad_Request);
         return State::Done;
       }
+      
+      skip_whitespaces(cursor);
+      if (cursor.remaining() < b.size()+2)
+        return State::Again;
+      
+      if (!match_until('-',cursor,CaseSensitivity::Sensitive)
+          ||!cursor.advance(1) || cursor.current()!='-' )
+        {
+          raise("Multipart Form data boundary not defined", Code::Bad_Request);
+          return State::Done;
+        }
+      
+      cursor.advance(1);
 
-      //auto token = matchValue(cursor);
-      // Boundary value
-      //auto value = token.text();
-
-      while (!match_until('-', cursor)) {
+      if (!match_string(b.c_str(),b.size(),cursor,CaseSensitivity::Sensitive))
+        {
+          raise("Multipart Form data boundary not defined", Code::Bad_Request);
+          return State::Done;
+        }
+      cursor.advance(2);//crlf
+        
+    while (!match_string(b.c_str(),b.size(), cursor)) {
         //message->body_.append()
           // FormData();
           // FormField({})
@@ -477,7 +490,7 @@ namespace Private {
           ssize_t fileBufferSize;
 
         try {
-          auto* tmpFd = tmpfile();
+          //auto* tmpFd = tmpfile();
           do {
             //cursor.advance(available);
             //auto part = chunkData.rawText();
@@ -487,10 +500,10 @@ namespace Private {
           raise(e.what());
         }
       };
-    }
-    else {
+    
+    
       raise("Content-Type in request body should be multipart form data", Code::Bad_Request);
-    }
+    
 
     return State::Done;
   }
@@ -527,7 +540,7 @@ namespace Private {
 
 } // namespace Private
 
-Message::Message()
+  Message::Message()
     : version_(Version::Http11)
 { }
 
@@ -545,7 +558,7 @@ namespace Uri {
         params.insert(std::make_pair(std::move(name), std::move(value)));
     }
 
-    Optional<std::string>
+  Optional<std::string>
     Query::get(const std::string& name) const {
         auto it = params.find(name);
         if (it == std::end(params))

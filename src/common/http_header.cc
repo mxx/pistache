@@ -513,7 +513,7 @@ Server::write(std::ostream& os) const
 void
 ContentType::parseRaw(const char* str, size_t len)
 {
-    mime_.parseRaw(str, len);
+  mime_.parseRaw(str, len);
 }
 
 void
@@ -521,19 +521,17 @@ ContentType::write(std::ostream& os) const {
     os << mime_.toString();
 }
 
-/*
-  MultipartContentType::parseRaw(const char* str, size_t len)
-  {
-    auto mime = mime_.parseRaw(str, len);
+void
+ContentDisposition::parseRaw(const char* str, size_t len){
+  mime_.parseRaw(str, len);
+}
+  
 
-    std::string str(str);
-    auto boundary = std::find(std::begin(str), std::end(str), "boundary=");
-
-    if (boundary != std::end(str)) {
-      boundary = str.substr(boundary)
-        }
-  }
-*/  
+void
+ContentDisposition::write(std::ostream& os) const {
+  
+}
+  
 } // namespace Header
 } // namespace Http
 } // namespace Pistache
