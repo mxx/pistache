@@ -18,7 +18,7 @@ namespace Http {
 namespace {
     std::unordered_map<
         std::string,
-        Registry::RegistryFunc,
+      Registry::RegistryFunc,
         LowercaseHash,
         LowercaseEqual
     > registry;

@@ -29,7 +29,7 @@ toLowercase(std::string str);
 
 struct LowercaseEqual {
   bool operator()(const std::string& left, const std::string& right) const {
-        return toLowercase(left) == toLowercase(right);
+    return toLowercase(left) == toLowercase(right);
     }
 };
 

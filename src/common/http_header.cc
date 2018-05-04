@@ -20,12 +20,12 @@ namespace Pistache {
 namespace Http {
 namespace Header {
 
-const char* encodingString(Encoding encoding) {
+  const char* encodingString(Encoding encoding) {
     switch (encoding) {
     case Encoding::Gzip:
         return "gzip";
     case Encoding::Compress:
-        return "compress";
+      return "compress";
     case Encoding::Deflate:
         return "deflate";
     case Encoding::Identity:
@@ -33,7 +33,7 @@ const char* encodingString(Encoding encoding) {
     case Encoding::Chunked:
         return "chunked";
     case Encoding::Unknown:
-        return "unknown";
+      return "unknown";
     }
 
     unreachable();
@@ -53,7 +53,7 @@ void
 Allow::parseRaw(const char* str, size_t len) {
 }
 
-void
+  void
 Allow::write(std::ostream& os) const {
     /* This puts an extra ',' at the end :/
     std::copy(std::begin(methods_), std::end(methods_),
@@ -518,12 +518,36 @@ ContentType::parseRaw(const char* str, size_t len)
 
 void
 ContentType::write(std::ostream& os) const {
-    os << mime_.toString();
+  os << mime_.toString();
 }
 
 void
 ContentDisposition::parseRaw(const char* str, size_t len){
-  mime_.parseRaw(str, len);
+  RawStreamBuf<char> buf(const_cast<char *>(str), len);
+  StreamCursor cursor(&buf);
+  skip_whitespaces(cursor);
+  StreamCursor::Token typeToken(cursor);
+
+  if (!match_until({';','\r'},cursor,CaseSensitivity::Sensitive))
+    throw std::runtime_error("Ill-formed Disposition header");
+  type_ = typeToken.text();
+  
+  while(!cursor.eol() && !cursor.eof())
+    {
+      cursor.advance(1);
+      skip_whitespaces(cursor);
+      StreamCursor::Token paramToken(cursor);
+      match_until({';','\r'},cursor,CaseSensitivity::Sensitive);
+      size_t pos = paramToken.text().find('=');
+      if (pos!=std::string::npos)
+        {
+          params_.insert(std::pair<std::string,std::string>
+                            (paramToken.text().substr(0,pos),
+                             paramToken.text().substr(pos+1)));
+        }
+      else
+        throw std::runtime_error("Ill-formed Disposition header");
+    };
 }
   
 
