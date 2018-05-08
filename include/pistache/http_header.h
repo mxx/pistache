@@ -346,7 +346,7 @@ namespace Pistache {
         Mime::MediaType mime_;
 
       };
-
+      
       class ContentDisposition : public Header {
       public:
         NAME("Content-Disposition")
@@ -356,8 +356,8 @@ namespace Pistache {
         void parseRaw(const char* str, size_t len);
         void write(std::ostream& os) const;
         
-        std::string type() const {return type_;}
-        std::map<std::string,std::string> params() const {return params_;}
+        std::string& type() {return type_;}
+        std::map<std::string,std::string>& params() {return params_;}
       private:
         std::string type_;
         std::map<std::string,std::string> params_;

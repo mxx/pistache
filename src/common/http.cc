@@ -447,6 +447,35 @@ namespace Pistache {
         return State::Done;
       }
 
+      bool parseMultipartStart(StreamCursor& cursor)
+      {
+        if (!match_until('-',cursor,CaseSensitivity::Sensitive)
+            ||!cursor.advance(1) || cursor.current()!='-' || !cursor.advance(1))
+          {
+            throw HttpError(Code::Bad_Request,"Multipart Form data boundary malformed on start");
+          }
+        return true;
+      }
+
+      bool parseMultipartBoundary(StreamCursor& cursor, std::string b)
+      {
+        if (!match_string(b.c_str(),b.size(),cursor,CaseSensitivity::Sensitive))
+          {
+            throw HttpError(Code::Bad_Request, "Multipart Form data boundary malformed");
+          }
+        return true;
+      }
+      
+      bool testMultipartEnd(StreamCursor& cursor)
+      {
+        if (match_string("--",2,cursor,CaseSensitivity::Sensitive))
+          return true;
+        if (match_string("\r\n",2,cursor,CaseSensitivity::Sensitive))
+          return false;
+        
+        throw HttpError(Code::Bad_Request, "Multipart Form data boundary malformed on end");
+      }
+
       State
       BodyStep::parseMultipartForm(StreamCursor& cursor, const std::shared_ptr<Header::ContentType>& ct) {
         auto request = static_cast<Request *>(message);
@@ -455,6 +484,7 @@ namespace Pistache {
         auto mime = ct->mime();
         auto boundary = mime.getParam("boundary");
         string b=boundary.get();
+        string partEnd = "\r\n--" + b;
         if (boundary.isEmpty()) {
           raise("Multipart Form data boundary not defined", Code::Bad_Request);
           return State::Done;
@@ -463,35 +493,37 @@ namespace Pistache {
         skip_whitespaces(cursor);
         if (cursor.remaining() < b.size()+4)
           return State::Again;
-      
-        if (!match_until('-',cursor,CaseSensitivity::Sensitive)
-            ||!cursor.advance(1) || cursor.current()!='-' || !cursor.advance(1))
-          {
-            raise("Multipart Form data boundary malformed on start", Code::Bad_Request);
-            return State::Done;
-          }
-      
-        if (!match_string(b.c_str(),b.size(),cursor,CaseSensitivity::Sensitive)
-            || !match_string("\r\n",2,cursor,CaseSensitivity::Sensitive))
-          {
-            raise("Multipart Form data boundary malformed on end", Code::Bad_Request);
-            return State::Done;
-          }
-      
-        //StreamCursor::Revert revert(cursor);        
-        std::shared_ptr<Header::ContentDisposition> header;
-        if (parseMultipartFormHeads(cursor,header) != State::Next)
-          return State::Again;
-        //revert.ignore();
-        StreamCursor::Token partBodyToken(cursor);
-        while(!match_string(b.c_str(),b.size(),cursor,CaseSensitivity::Sensitive))
-          {
-            if (!cursor.advance(1)) return State::Again;
-          }
+
         
-        std::string strName = header->params().at("name");
-        request->query_.add(strName,partBodyToken.text());
-        std::cout << partBodyToken.text();
+          parseMultipartStart(cursor);
+          parseMultipartBoundary(cursor,b);
+          if (cursor.remaining() < 2)
+            return State::Again;
+        do {  
+          if (testMultipartEnd(cursor))
+            break;
+        
+          std::shared_ptr<Header::ContentDisposition> header;
+          if (parseMultipartFormHeads(cursor,header) != State::Next)
+            return State::Again;
+        
+          StreamCursor::Token partBodyToken(cursor);
+          while( !match_string(partEnd.c_str(),partEnd.size(),cursor,CaseSensitivity::Sensitive))
+            {
+              do
+                {
+                  if (!cursor.advance(1)) return State::Again;
+                } while(cursor.current() != partEnd[0]);
+              
+            }
+        
+          std::string strName = header->params().at("name");
+          request->query_.add(strName,partBodyToken.text());
+          
+          if (cursor.remaining() < 2)
+            return State::Again;
+
+        }  while(1);
         revert.ignore();
         return State::Done;
       }
