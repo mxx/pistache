@@ -158,6 +158,7 @@ namespace Pistache {
           if (!cursor.advance(1)) return State::Again;
         
         request->resource_ = resToken.text();
+        std::cerr << "parse " << request->resource_ << std::endl;
 
         // Query parameters of the Uri
         if (n == '?') {
@@ -447,7 +448,7 @@ namespace Pistache {
         return State::Done;
       }
 
-      bool parseMultipartStart(StreamCursor& cursor)
+      bool passtoMultipartStart(StreamCursor& cursor)
       {
         if (!match_until('-',cursor,CaseSensitivity::Sensitive)
             ||!cursor.advance(1) || cursor.current()!='-' || !cursor.advance(1))
@@ -457,7 +458,7 @@ namespace Pistache {
         return true;
       }
 
-      bool parseMultipartBoundary(StreamCursor& cursor, std::string b)
+      bool passtoMultipartBoundary(StreamCursor& cursor, std::string b)
       {
         if (!match_string(b.c_str(),b.size(),cursor,CaseSensitivity::Sensitive))
           {
@@ -474,6 +475,18 @@ namespace Pistache {
           return false;
         
         throw HttpError(Code::Bad_Request, "Multipart Form data boundary malformed on end");
+      }
+
+      std::string trimQuotationMark(std::string str)
+      {
+        std::size_t startPos = str.find('"');
+        if (startPos != std::string::npos)
+          {
+            std::size_t endPos = str.find('"',startPos+1);
+            if (endPos != std::string::npos && endPos > startPos)
+              return str.substr(startPos+1,endPos-startPos-1);
+          }
+        return str; 
       }
 
       State
@@ -495,10 +508,10 @@ namespace Pistache {
           return State::Again;
 
         
-          parseMultipartStart(cursor);
-          parseMultipartBoundary(cursor,b);
-          if (cursor.remaining() < 2)
-            return State::Again;
+        passtoMultipartStart(cursor);
+        passtoMultipartBoundary(cursor,b);
+        if (cursor.remaining() < 2)
+          return State::Again;
         do {  
           if (testMultipartEnd(cursor))
             break;
@@ -515,10 +528,13 @@ namespace Pistache {
                   if (!cursor.advance(1)) return State::Again;
                 } while(cursor.current() != partEnd[0]);
               
-            }
+            };
         
-          std::string strName = header->params().at("name");
-          request->query_.add(strName,partBodyToken.text());
+          std::string strName = trimQuotationMark(header->params().at("name"));
+          request->
+            query_.add(strName,
+                       std::string(partBodyToken.rawText(),
+                                   partBodyToken.size() - partEnd.size()));
           
           if (cursor.remaining() < 2)
             return State::Again;
@@ -583,10 +599,13 @@ namespace Pistache {
         } while (state == State::Next);
 
         // Should be either Again or Done
+        if (state == State::Done)
+          buffer.clear();
         return state;
       }
 
-      bool
+
+     bool
       ParserBase::feed(const char* data, size_t len) {
         return buffer.feed(data, len);
       }
@@ -792,7 +811,7 @@ namespace Pistache {
     serveFile(ResponseWriter& response, const char* fileName, const Mime::MediaType& contentType)
     {
       struct stat sb;
-
+      std::cerr << "open " << fileName << std::endl;
       int fd = open(fileName, O_RDONLY);
       if (fd == -1) {
         /* @Improvement: maybe could we check for errno here and emit a different error

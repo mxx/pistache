@@ -13,7 +13,7 @@ namespace Pistache {
 namespace Rest {
 
 Request::Request(
-        const Http::Request& request,
+                 const Http::Request& request,
         std::vector<TypedParam>&& params,
         std::vector<TypedParam>&& splats)
     : Http::Request(request)
@@ -166,6 +166,7 @@ Route::Fragment::isSplat() const {
 std::tuple<bool, std::vector<TypedParam>, std::vector<TypedParam>>
 Route::match(const Http::Request& req) const
 {
+  std::cerr << "req " << req.resource() << std::endl;
     return match(req.resource());
 }
 

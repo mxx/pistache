@@ -97,15 +97,6 @@ namespace Pistache {
   }
 
   bool feed(const char* data, size_t len) {
-    if (this->gptr() && this->gptr()!=bytes) {
-      size -= this->gptr() - bytes ;
-      if (size) {
-        memmove(bytes,this->gptr(),size);
-        Base::setg(bytes,bytes,bytes+size);
-        
-      }
-    }
-    
     if (size + len > N) {
       return false;
     }
@@ -252,11 +243,6 @@ namespace Pistache {
       return true;      
     }
 
-    void pre_alloc(size_t len)
-    {
-      reserve(data_.size() + len);
-    }
-
   protected:
     int_type overflow(int_type ch);
 
@@ -303,7 +289,7 @@ namespace Pistache {
       const char* rawText() const {
         return gptr;
       }
-
+      
     private:
       StreamCursor& cursor;
       size_t position;
