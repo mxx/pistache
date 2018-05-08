@@ -17,7 +17,7 @@ namespace Rest {
 namespace Serializer {
 
 template<typename Writer>
-void serializeInfo(Writer& writer, const Schema::Info& info) {
+  void serializeInfo(Writer& writer, const Schema::Info& info) {
     writer.String("swagger");
     writer.String("2.0");
     writer.String("info");
@@ -60,14 +60,13 @@ void serializePC(Writer& writer, const Schema::ProduceConsume& pc) {
 }
 
 template<typename Writer>
-void serializeParameter(Writer& writer, const Schema::Parameter& parameter) {
+  void serializeParameter(Writer& writer, const Schema::Parameter& parameter) {
     writer.StartObject();
     {
         writer.String("name");
         writer.String(parameter.name.c_str());
         writer.String("in");
-        // @Feature: support other types of parameters
-        writer.String("path");
+        writer.String(parameter.locationString());
         writer.String("description");
         writer.String(parameter.description.c_str());
         writer.String("required");

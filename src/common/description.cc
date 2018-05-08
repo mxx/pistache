@@ -15,9 +15,9 @@ namespace Rest {
 
 const char* schemeString(Scheme scheme) {
     switch (scheme) {
-#define SCHEME(e, str) \
+#define SCHEME(e, str)  \
         case Scheme::e: \
-            return str;
+          return str;
         SCHEMES
 #undef SCHEME
     }
@@ -25,6 +25,8 @@ const char* schemeString(Scheme scheme) {
     return nullptr;
 }
 
+  
+  
 namespace Schema {
 
 Contact::Contact(
@@ -53,7 +55,7 @@ PathDecl::PathDecl(
     , method(method)
 { }
 
-Path::Path(
+  Path::Path(
         std::string value, Http::Method method, std::string description)
     : value(std::move(value))
     , method(method)
@@ -201,7 +203,7 @@ SubPath::route(std::string name, Http::Method method, std::string description) {
     std::copy(std::begin(parameters), std::end(parameters), std::back_inserter(path.parameters));
 
     auto it = paths->add(std::move(path));
-
+    
     return PathBuilder(&*it);
 }
 
@@ -216,12 +218,25 @@ SubPath::path(std::string prefix) {
 }
 
 Parameter::Parameter(
-        std::string name, std::string description)
+                     std::string name, std::string description, ParameterLocation input)
     : name(std::move(name))
     , description(std::move(description))
+    , in(input)
     , required(true)
-{ } 
-
+{ }
+  
+  const char* Parameter::locationString(void) const
+  {
+    switch (in){
+#define PARAMETER_LOCATION(e)                   \
+      case ParameterLocation::e:                \
+        return #e;
+      PARAMETER_LOCATIONS
+#undef PARAMETER_LOCATION
+        }
+    return nullptr;
+  }
+  
 Response::Response(
         Http::Code statusCode, std::string description)
     : statusCode(statusCode)
