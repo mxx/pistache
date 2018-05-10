@@ -318,7 +318,7 @@ Description::del(std::string name) {
 
 Schema::SubPath
 Description::path(std::string name) {
-    return Schema::SubPath(std::move(name), &paths_);
+  return Schema::SubPath(basePath_ + std::move(name), &paths_);
 }
 
 Schema::PathBuilder
@@ -338,7 +338,7 @@ Description::response(Http::Code statusCode, std::string description) {
     return builder;
 }
 
-Swagger&
+  Swagger&
 Swagger::uiPath(std::string path) {
     uiPath_ = std::move(path);
     return *this;

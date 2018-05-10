@@ -24,7 +24,7 @@ Request::Request(
 
 bool
 Request::hasParam(std::string name) const {
-    auto it = std::find_if(params_.begin(), params_.end(), [&](const TypedParam& param) {
+  auto it = std::find_if(params_.begin(), params_.end(), [&](const TypedParam& param) {
             return param.name() == name;
     });
 
