@@ -17,7 +17,7 @@ namespace Rest {
 namespace Serializer {
 
 template<typename Writer>
-  void serializeSchemaObj(Writer& writer, const Schema::ProduceConsume& obj)
+  void serializeSchemaObj(Writer& writer, const Schema::SchemaObj& obj)
   {
     writer.StartObject();
     if (!obj.type.empty())
