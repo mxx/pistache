@@ -118,7 +118,11 @@ namespace Pistache {
 
       struct SchemaObj {
         SchemaObj(std::string type, std::string format);
-        
+        SchemaObj& addProp(std::string name, std::string type,std::string format) {
+          SchemaObj obj(type,format);
+          properties.insert(std::pair<std::string,SchemaObj>(name,obj));
+          return *this;
+        };
         std::string type;
         std::string format;
         std::map<std::string, SchemaObj> properties;
