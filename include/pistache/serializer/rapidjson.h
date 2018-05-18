@@ -17,6 +17,29 @@ namespace Rest {
 namespace Serializer {
 
 template<typename Writer>
+  void serializeSchemaObj(Writer& writer, const Schema::ProduceConsume& obj)
+  {
+    writer.StartObject();
+    if (!obj.type.empty())
+      {
+        Writer.String("type");
+        Writer.String(obj.type.c_str());
+      }
+    if (obj.properties.size())
+      {
+        Writer.String("properties");
+        writer.StartObject();
+        for(const auto& i: properties){
+          Writer.String(i.first);
+          serializeSchemaObj(writer, i.second);
+        }
+        writer.EndObject();     
+      }
+        
+    writer.EndObject();    
+}
+  
+template<typename Writer>
   void serializeInfo(Writer& writer, const Schema::Info& info) {
     writer.String("swagger");
     writer.String("2.0");
@@ -78,13 +101,18 @@ template<typename Writer>
 }
 
 template<typename Writer>
-void serializeResponse(Writer& writer, const Schema::Response& response) {
+  void serializeResponse(Writer& writer, const Schema::Response& response) {
     auto code = std::to_string(static_cast<uint32_t>(response.statusCode));
     writer.String(code.c_str());
     writer.StartObject();
     {
         writer.String("description");
         writer.String(response.description.c_str());
+        if (schema)
+          {
+            writer.String("schema");
+            serializeSchemaObj(writer,schema);
+          }
     }
     writer.EndObject();
 }
