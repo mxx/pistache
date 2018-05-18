@@ -579,6 +579,8 @@ namespace Pistache {
       Step(Message* request)
       : message(request)
         { }
+       
+        virtual ~Step() = default;       
 
         virtual State apply(StreamCursor& cursor) = 0;
       
