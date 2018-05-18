@@ -22,24 +22,24 @@ template<typename Writer>
     writer.StartObject();
     if (!obj.type.empty())
       {
-        Writer.String("type");
-        Writer.String(obj.type.c_str());
+        writer.String("type");
+        writer.String(obj.type.c_str());
       }
     if (obj.properties.size())
       {
-        Writer.String("properties");
+        writer.String("properties");
         writer.StartObject();
         for(const auto& i: properties){
-          Writer.String(i.first);
+          writer.String(i.first);
           serializeSchemaObj(writer, i.second);
         }
         writer.EndObject();     
       }
         
     writer.EndObject();    
-}
+  }
   
-template<typename Writer>
+ template<typename Writer>
   void serializeInfo(Writer& writer, const Schema::Info& info) {
     writer.String("swagger");
     writer.String("2.0");
