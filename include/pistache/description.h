@@ -300,7 +300,7 @@ namespace Pistache {
 
         flat_iterator flatBegin() const;
         flat_iterator flatEnd() const;
-
+        
         Map groups() const { return groups_; }
 
       private:
@@ -336,7 +336,7 @@ namespace Pistache {
         }
 
         PathBuilder& response(Http::Code statusCode, std::string description, std::shared_ptr<SchemaObj> ptr) {
-          path_->responses.push_back(Response(statusCode, std::move(description)),ptr);
+          path_->responses.push_back(Response(statusCode, std::move(description),ptr));
           return *this;
         }
 
