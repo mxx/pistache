@@ -29,7 +29,7 @@ template<typename Writer>
       {
         writer.String("properties");
         writer.StartObject();
-        for(const auto& i: properties){
+        for(const auto& i: obj.properties){
           writer.String(i.first);
           serializeSchemaObj(writer, i.second);
         }
