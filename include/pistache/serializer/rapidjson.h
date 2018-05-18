@@ -108,7 +108,7 @@ template<typename Writer>
     {
         writer.String("description");
         writer.String(response.description.c_str());
-        if (repsonse.schema)
+        if (response.schema)
           {
             writer.String("schema");
             serializeSchemaObj(writer,*response.schema);
