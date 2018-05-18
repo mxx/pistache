@@ -335,6 +335,11 @@ namespace Pistache {
           return *this;
         }
 
+        PathBuilder& response(Http::Code statusCode, std::string description, std::shared_ptr<SchemaObj> ptr) {
+          path_->responses.push_back(Response(statusCode, std::move(description)),ptr);
+          return *this;
+        }
+
         PathBuilder& response(Response response) {
           path_->responses.push_back(std::move(response));
           return *this;
