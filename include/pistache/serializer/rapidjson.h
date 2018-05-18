@@ -108,10 +108,10 @@ template<typename Writer>
     {
         writer.String("description");
         writer.String(response.description.c_str());
-        if (schema)
+        if (repsonse.schema)
           {
             writer.String("schema");
-            serializeSchemaObj(writer,schema);
+            serializeSchemaObj(writer,*response.schema);
           }
     }
     writer.EndObject();
