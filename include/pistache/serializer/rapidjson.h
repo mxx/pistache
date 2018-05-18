@@ -30,10 +30,10 @@ template<typename Writer>
         writer.String("properties");
         writer.StartObject();
         for(const auto& i: obj.properties){
-          writer.String(i.first);
+          writer.String(i.first.c_str());
           serializeSchemaObj(writer, i.second);
         }
-        writer.EndObject();     
+        writer.EndObject();
       }
         
     writer.EndObject();    
