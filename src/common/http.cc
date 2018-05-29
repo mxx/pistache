@@ -496,7 +496,7 @@ namespace Pistache {
         // This is the beginning of the multipart body
         auto mime = ct->mime();
         auto boundary = mime.getParam("boundary");
-        string b=boundary.get();
+        string b=boundary.getOrElse("");
         string partEnd = "\r\n--" + b;
         if (boundary.isEmpty()) {
           raise("Multipart Form data boundary not defined", Code::Bad_Request);
