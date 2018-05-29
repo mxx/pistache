@@ -166,7 +166,7 @@ Route::Fragment::isSplat() const {
 std::tuple<bool, std::vector<TypedParam>, std::vector<TypedParam>>
 Route::match(const Http::Request& req) const
 {
-  std::cerr << "req " << req.resource() << std::endl;
+  //std::cerr << "req " << req.resource() << std::endl;
     return match(req.resource());
 }
 
