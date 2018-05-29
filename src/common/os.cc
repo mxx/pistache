@@ -33,7 +33,7 @@ int hardware_concurrency() {
 
 bool make_non_blocking(int sfd)
 {
-    int flags = fcntl (sfd, F_GETFL, 0);
+  int flags = fcntl (sfd, F_GETFL, 0);
     if (flags == -1) return false; 
 
     flags |= O_NONBLOCK;
@@ -53,7 +53,7 @@ CpuSet::CpuSet(std::initializer_list<size_t> cpus) {
 
 void
 CpuSet::clear() {
-    bits.reset();
+  bits.reset();
 }
 
 CpuSet&

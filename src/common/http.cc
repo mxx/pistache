@@ -158,7 +158,7 @@ namespace Pistache {
           if (!cursor.advance(1)) return State::Again;
         
         request->resource_ = resToken.text();
-        std::cerr << "parse " << request->resource_ << std::endl;
+        //std::cerr << "parse " << request->resource_ << std::endl;
 
         // Query parameters of the Uri
         if (n == '?') {
@@ -811,7 +811,7 @@ namespace Pistache {
     serveFile(ResponseWriter& response, const char* fileName, const Mime::MediaType& contentType)
     {
       struct stat sb;
-      std::cerr << "open " << fileName << std::endl;
+      //std::cerr << "open " << fileName << std::endl;
       int fd = open(fileName, O_RDONLY);
       if (fd == -1) {
         /* @Improvement: maybe could we check for errno here and emit a different error
