@@ -24,6 +24,11 @@ template<typename Writer>
       {
         writer.String("type");
         writer.String(obj.type.c_str());
+        for(const auto& i: obj.fields)
+          {
+            writer.Key(i.first.c_str());
+            serializeSchemaObj(writer,i.second);
+          }
       }
     if (obj.properties.size())
       {

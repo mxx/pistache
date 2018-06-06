@@ -169,7 +169,7 @@ namespace Pistache {
         auto &group = groups_[path.value];
         return group.insert(group.end(), std::move(path));
       }
-
+      
       PathGroup::const_iterator
       PathGroup::begin() const {
         return groups_.begin();

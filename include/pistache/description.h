@@ -115,19 +115,27 @@ namespace Pistache {
           };
 
       } // namespace Traits
-
+      
       struct SchemaObj {
         SchemaObj(std::string type, std::string format);
         SchemaObj& addProp(std::string name, std::string type,std::string format) {
           SchemaObj obj(type,format);
           properties.insert(std::pair<std::string,SchemaObj>(name,obj));
-          return *this;
+          return properties.find(name)->second;
         };
+        SchemaObj& addField(std::string name, std::string type,std::string format) {
+          SchemaObj obj(type,format);
+          fields.insert(std::pair<std::string,SchemaObj>(name,obj));
+          return fields.find(name)->second;
+        };
+        
         std::string type;
         std::string format;
+        std::string description;
+        std::map<std::string, SchemaObj> fields;
         std::map<std::string, SchemaObj> properties;
       };
-      
+
       struct ProduceConsume {
 
         std::vector<Http::Mime::MediaType> produce;
