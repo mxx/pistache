@@ -234,7 +234,7 @@ void serializeDescription(Writer& writer, const Description& desc) {
     writer.EndObject();
 }
 
-std::string rapidJson(const Description& desc) {
+inline std::string rapidJson(const Description& desc) {
     rapidjson::StringBuffer sb;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
     serializeDescription(writer, desc);

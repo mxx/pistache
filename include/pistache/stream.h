@@ -133,10 +133,10 @@ namespace Pistache {
         , isOwned(false)
   { }
 
-  Buffer(const char * const data, size_t len, bool own = false)
-  : data(data)
-  , len(len)
-      , isOwned(own)
+    Buffer(const char * const _data, size_t _len, bool _own = false)
+        : data(_data)
+        , len(_len)
+        , isOwned(_own)
     { }
 
     Buffer detach(size_t fromIndex = 0) const {
@@ -253,10 +253,10 @@ namespace Pistache {
     std::vector<char> data_;
   };
 
-  class StreamCursor {
-  public:
-  StreamCursor(StreamBuf<char>* buf, size_t initialPos = 0)
-    : buf(buf)
+class StreamCursor {
+public:
+    StreamCursor(StreamBuf<char>* _buf, size_t initialPos = 0)
+        : buf(_buf)
     {
       advance(initialPos);
     }
@@ -264,32 +264,32 @@ namespace Pistache {
     static constexpr int Eof = -1;
 
     struct Token {
-    Token(StreamCursor& cursor)
-    : cursor(cursor)
-    , position(cursor.buf->position())
-        , eback(cursor.buf->begptr())
-        , gptr(cursor.buf->curptr())
-        , egptr(cursor.buf->endptr())
-      { }
+        Token(StreamCursor& _cursor)
+            : cursor(_cursor)
+            , position(cursor.buf->position())
+            , eback(cursor.buf->begptr())
+            , gptr(cursor.buf->curptr())
+            , egptr(cursor.buf->endptr())
+        { }
 
-      size_t start() const { return position; }
+        size_t start() const { return position; }
 
-      size_t end() const {
-        return cursor.buf->position();
-      }
+        size_t end() const {
+            return cursor.buf->position();
+        }
 
-      size_t size() const {
-        return end() - start();
-      }
+        size_t size() const {
+            return end() - start();
+        }
 
-      std::string text() {
-        return std::string(gptr, size());
-      }
+        std::string text() {
+            return std::string(gptr, size());
+        }
 
-      const char* rawText() const {
-        return gptr;
-      }
-      
+        const char* rawText() const {
+            return gptr;
+        }
+
     private:
       StreamCursor& cursor;
       size_t position;
@@ -299,26 +299,26 @@ namespace Pistache {
     };
 
     struct Revert {
-    Revert(StreamCursor& cursor)
-    : cursor(cursor)
-    , eback(cursor.buf->begptr())
-        , gptr(cursor.buf->curptr())
-        , egptr(cursor.buf->endptr())
-        , active(true)
-      { }
+        Revert(StreamCursor& _cursor)
+            : cursor(_cursor)
+            , eback(cursor.buf->begptr())
+            , gptr(cursor.buf->curptr())
+            , egptr(cursor.buf->endptr())
+            , active(true)
+        { }
 
-      ~Revert() {
-        if (active)
-          revert();
-      }
+        ~Revert() {
+            if (active)
+                revert();
+        }
 
-      void revert() {
-        cursor.buf->setArea(eback, gptr, egptr);
-      }
+        void revert() {
+            cursor.buf->setArea(eback, gptr, egptr);
+        }
 
-      void ignore() {
-        active = false;
-      }
+        void ignore() {
+            active = false;
+        }
 
     private:
       StreamCursor& cursor;

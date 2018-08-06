@@ -1,6 +1,6 @@
 /* http.h
    Mathieu Stefani, 13 August 2015
-   
+
    Http Layer
 */
 
@@ -86,8 +86,7 @@ namespace Pistache {
       CookieJar cookies_;
     };
 
-    namespace Uri {
-      typedef std::string Fragment;
+namespace Uri {
 
       class Query {
       public:
@@ -97,12 +96,15 @@ namespace Pistache {
         void add(std::string name, std::string value);
         Optional<std::string> get(const std::string& name) const;
         bool has(const std::string& name) const;
-
+        // Return empty string or "?key1=value1&key2=value2" if query exist
+        std::string as_str() const;
+        
         void clear() {
           params.clear();
         }
 
-      private:
+    private:
+        //first is key second is value
         std::unordered_map<std::string, std::string> params;
       };
     } // namespace Uri
@@ -140,10 +142,10 @@ namespace Pistache {
          implementation of libstdc++. Under contention, we experience a performance
          drop of 5x with that lock
 
-         If this turns out to be a problem, we might be able to replace the weak_ptr
-         trick to detect peer disconnection by a plain old "observer" pointer to a 
-         tcp connection with a "stale" state
-      */
+        If this turns out to be a problem, we might be able to replace the weak_ptr
+        trick to detect peer disconnection by a plain old "observer" pointer to a
+        tcp connection with a "stale" state
+    */
 #ifdef LIBSTDCPP_SMARTPTR_LOCK_FIXME
       std::shared_ptr<Tcp::Peer> peer() const;
 #endif
@@ -231,19 +233,19 @@ namespace Pistache {
 
     private:
     Timeout(const Timeout& other)
-      : transport(other.transport)
-        , handler(other.handler)
+        : handler(other.handler)
         , request(other.request)
+        , transport(other.transport)
         , armed(other.armed)
         , timerFd(other.timerFd)
         { }
 
-    Timeout(Tcp::Transport* transport,
-            Handler* handler,
-            Request request)
-      : transport(transport)
-        , handler(handler)
-        , request(std::move(request))
+    Timeout(Tcp::Transport* transport_,
+            Handler* handler_,
+            Request request_)
+        : handler(handler_)
+        , request(std::move(request_))
+        , transport(transport_)
         , armed(false)
         , timerFd(-1)
         {
@@ -512,18 +514,25 @@ namespace Pistache {
         return timeout_;
       }
 
-      // Unsafe API
+    std::shared_ptr<Tcp::Peer> peer() const {
+        if (peer_.expired())
+            throw std::runtime_error("Write failed: Broken pipe");
+
+        return peer_.lock();
+    }
+
+    // Unsafe API
 
       DynamicStreamBuf *rdbuf() {
         return &buf_;
       }
 
-      DynamicStreamBuf *rdbuf(DynamicStreamBuf* other) {
-        throw std::domain_error("Unimplemented");
-      }
+    DynamicStreamBuf *rdbuf([[maybe_unused]] DynamicStreamBuf* other) {
+       UNUSED(other)
+       throw std::domain_error("Unimplemented");
+    }
 
-
-      ResponseWriter clone() const {
+    ResponseWriter clone() const {
         return ResponseWriter(*this);
       }
 
@@ -532,8 +541,8 @@ namespace Pistache {
       : Response(request.version())
         , buf_(DefaultStreamSize)
         , transport_(transport)
-        , timeout_(transport, handler, std::move(request)) 
-        { }
+        , timeout_(transport, handler, std::move(request))
+    { }
 
     ResponseWriter(const ResponseWriter& other)
       : Response(other)
@@ -543,15 +552,8 @@ namespace Pistache {
         , timeout_(other.timeout_)
         { }
 
-      std::shared_ptr<Tcp::Peer> peer() const {
-        if (peer_.expired())
-          throw std::runtime_error("Write failed: Broken pipe");
-
-        return peer_.lock();
-      }
-
-      template<typename Ptr>
-        void associatePeer(const Ptr& peer) {
+    template<typename Ptr>
+    void associatePeer(const Ptr& peer) {
         if (peer_.use_count() > 0)
           throw std::runtime_error("A peer was already associated to the response");
 
@@ -579,8 +581,8 @@ namespace Pistache {
       Step(Message* request)
       : message(request)
         { }
-       
-        virtual ~Step() = default;       
+
+        virtual ~Step() = default;
 
         virtual State apply(StreamCursor& cursor) = 0;
       
@@ -613,12 +615,12 @@ namespace Pistache {
         State apply(StreamCursor& cursor);
       };
 
-      struct BodyStep : public Step {
-      BodyStep(Message* message)
-        : Step(message)
-          , chunk(message)
-          , bytesRead(0)
-          { }
+    struct BodyStep : public Step {
+        BodyStep(Message* message_)
+            : Step(message_)
+            , chunk(message_)
+            , bytesRead(0)
+        { }
 
         State apply(StreamCursor& cursor);
 
@@ -626,11 +628,11 @@ namespace Pistache {
         struct Chunk {
           enum Result { Complete, Incomplete, Final };
 
-        Chunk(Message* message)
-        : message(message)
-        , bytesRead(0)
-            , size(-1)
-          { }
+            Chunk(Message* message_)
+              : message(message_)
+              , bytesRead(0)
+              , size(-1)
+            { }
 
           Result parse(StreamCursor& cursor);
 
@@ -656,17 +658,19 @@ namespace Pistache {
         size_t bytesRead;
       };
 
-      struct ParserBase {
-      ParserBase()
-      : currentStep(0)
-      , cursor(&buffer)
+    struct ParserBase {
+        ParserBase()
+            : cursor(&buffer)
+            , currentStep(0)
         {
         }
 
-      ParserBase(const char* data, size_t len)
-      : currentStep(0)
-      , cursor(&buffer)
+        ParserBase(const char* data, size_t len)
+            : cursor(&buffer)
+            , currentStep(0)
         {
+            UNUSED(data)
+            UNUSED(len)
         }
 
         ParserBase(const ParserBase& other) = delete;
@@ -691,10 +695,10 @@ namespace Pistache {
 
       template<typename Message> struct Parser;
 
-      template<> struct Parser<Http::Request> : public ParserBase {
-      Parser()
-        : ParserBase()
-          { 
+    template<> struct Parser<Http::Request> : public ParserBase {
+        Parser()
+            : ParserBase()
+        {
             allSteps[0].reset(new RequestLineStep(&request));
             allSteps[1].reset(new HeadersStep(&request));
             allSteps[2].reset(new BodyStep(&request));
