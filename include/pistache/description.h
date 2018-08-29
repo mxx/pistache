@@ -117,6 +117,7 @@ namespace Pistache {
       } // namespace Traits
       
       struct SchemaObj {
+        SchemaObj(){};
         SchemaObj(std::string type, std::string format);
         SchemaObj& addProp(std::string name, std::string type,std::string format) {
           SchemaObj obj(type,format);
@@ -149,7 +150,7 @@ namespace Pistache {
         std::string url;
         std::string email;
       };
-
+      
       struct License {
         License(std::string name, std::string url);
 
@@ -187,7 +188,7 @@ namespace Pistache {
 
         virtual bool validate(const std::string& input) const = 0;
       };
-
+      
       template<typename T>
         struct DataTypeT : public DataType {
         const char* typeName() const { return Traits::DataTypeInfo<T>::typeName(); }
@@ -217,6 +218,7 @@ namespace Pistache {
         std::string name;
         std::string description;
         ParameterLocation in;
+        SchemaObj schema;
         bool required;
         std::shared_ptr<DataType> type;
         const char* locationString(void) const;
@@ -338,6 +340,12 @@ namespace Pistache {
           return *this;
         }
 
+        
+        PathBuilder& parameter(Parameter& obj) {
+          path_->parameters.push_back(std::move(obj));
+          return *this;
+        }
+        
         PathBuilder& response(Http::Code statusCode, std::string description) {
           path_->responses.push_back(Response(statusCode, std::move(description)));
           return *this;
@@ -434,7 +442,7 @@ namespace Pistache {
         std::copy(std::begin(m), std::end(m), std::back_inserter(pc.produce));
         return *this;
       }
-
+      
       template<typename... Mimes>
         Description& consumes(Mimes... mimes) {
         Http::Mime::MediaType m[sizeof...(Mimes)] = { mimes... };

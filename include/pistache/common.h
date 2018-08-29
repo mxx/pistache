@@ -40,7 +40,7 @@
         if (ret < 0) { \
             const char *str = #__VA_ARGS__; \
             std::ostringstream oss; \
-            oss << str << ": " << strerror(errno); \
+            oss << str << ": " << strerror(errno);      \
             throw std::runtime_error(oss.str()); \
         } \
         return ret; \

@@ -29,7 +29,7 @@ public:
     { }
 
     void init(size_t thr = 2) {
-        auto opts = Http::Endpoint::options()
+      auto opts = Http::Endpoint::options()
             .threads(thr)
             .flags(Tcp::Options::InstallSignalHandler);
         httpEndpoint->init(opts);
@@ -90,7 +90,7 @@ private:
             .route(desc.get("/:name"), "Retrieve an account")
             .bind(&BankerService::retrieveAccount, this)
             .produces(MIME(Application, Json))
-            .parameter<Rest::Type::String>("name", "The name of the account to retrieve")
+          .parameter<Rest::Type::String>("name", "The name of the account to retrieve")
             .response(Http::Code::Ok, "The requested account")
             .response(backendErrorResponse);
 
@@ -119,7 +119,7 @@ private:
         response.send(Http::Code::Ok, "No Account");
     }
 
-    void retrieveAccount(const Rest::Request& req, Http::ResponseWriter response) {
+  void retrieveAccount(const Rest::Request& req, Http::ResponseWriter response) {
         response.send(Http::Code::Ok, "The bank is closed, come back later");
     }
 

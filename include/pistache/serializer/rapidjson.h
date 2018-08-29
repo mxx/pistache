@@ -13,11 +13,11 @@
 #include <pistache/mime.h>
 
 namespace Pistache {
-namespace Rest {
+  namespace Rest {
 namespace Serializer {
 
-template<typename Writer>
-  void serializeSchemaObj(Writer& writer, const Schema::SchemaObj& obj)
+  template<typename Writer>
+    void serializeSchemaObj(Writer& writer, const Schema::SchemaObj& obj)
   {
     writer.StartObject();
     if (!obj.type.empty())
@@ -99,8 +99,19 @@ template<typename Writer>
         writer.String(parameter.description.c_str());
         writer.String("required");
         writer.Bool(parameter.required);
-        writer.String("type");
-        writer.String(parameter.type->typeName());
+        if (std::string(parameter.locationString()) == "body")
+          {
+            writer.String("schema");
+            serializeSchemaObj(writer,parameter.schema);
+          }
+        else
+          {
+            if (parameter.type.get() != NULL)
+              {
+                writer.String("type");
+                writer.String(parameter.type->typeName());
+              }
+          }
     }
     writer.EndObject();
 }
