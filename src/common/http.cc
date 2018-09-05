@@ -331,7 +331,8 @@ namespace Pistache {
         if (cl && te)
           raise("Got mutually exclusive ContentLength and TransferEncoding header");
 
-        if (ct && (ct->mime().toString()==MIME(Multipart, FormData).toString()))
+        string str = MIME(Multipart, FormData).toString();
+        if (ct && ((ct->mime().toString().find(MIME(Multipart, FormData).toString())!=string::npos)))
           return parseMultipartForm(cursor,ct);
         
         if (cl)

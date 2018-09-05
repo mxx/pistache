@@ -48,7 +48,7 @@ namespace Route {
         #define CALL_MEMBER_FN(obj, pmf)  ((obj)->*(pmf))
 
         return [=](const Rest::Request& request, Http::ResponseWriter response) {
-            CALL_MEMBER_FN(obj, func)(request, std::move(response));
+          CALL_MEMBER_FN(obj, func)(request, std::move(response));
         };
 
         #undef CALL_MEMBER_FN
